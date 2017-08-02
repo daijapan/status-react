@@ -5,6 +5,8 @@
 (def color-blue2 "#5b6dee")
 (def color-blue3 "#424fae")
 (def color-blue4 "#4360df")
+(def color-blue5 "#5670e2")
+(def color-blue6 "#778ce7")
 (def color-blue-transparent "#7099e632")
 (def color-black "#000000")
 (def color-purple "#a187d5")
