@@ -191,9 +191,7 @@
     (fn [{:keys [webview-bridge] :as db} [_ state]]
       (case state
         "background" (status/stop-rpc-server)
-        "active" (do (status/start-rpc-server)
-                     (when webview-bridge
-                       (.resetOkHttpClient webview-bridge)))
+        "active" (status/start-rpc-server)
         nil))))
 
 (register-handler :request-permissions
