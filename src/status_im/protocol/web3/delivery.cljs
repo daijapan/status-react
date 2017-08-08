@@ -15,7 +15,7 @@
 
 (defn prepare-message
   [web3 {:keys [payload keypair to from topics ttl key-password]
-         :as message}
+         :as   message}
    callback]
   (let [{:keys [public]} keypair
 
@@ -37,15 +37,16 @@
         (callback
           (merge
             (select-keys message [:ttl])
-            {:type    (if to :asym :sym)
-             :sig     from
-             :key     (or to status-key-id)
-             :topic   (first topics)
-             :payload payload'}))))))
+            (let [type (if to :asym :sym)]
+              (cond-> {:sig     from
+                       :topic   (first topics)
+                       :payload payload'}
+                      to (assoc :pubKey to)
+                      (not to) (assoc :symKeyID status-key-id)))))))))
 
 (s/def :shh/pending-message
-  (s/keys :req-un [:message/sig :message-key/type :shh/payload :message/topic]
-          :opt-un [:message/ttl :message/key]))
+  (s/keys :req-un [:message/sig :shh/payload :message/topic]
+          :opt-un [:message/ttl :message/pubKey :message/symKeyID]))
 
 (defonce pending-mesage-callback (atom nil))
 (defonce recipient->pending-message (atom {}))
@@ -82,17 +83,17 @@
                      update to set/union #{[web3 message-id to]}))))))))
 
 (s/def :delivery/pending-message
-  (s/keys :req-un [:message/sig :message/key :message/to :shh/payload
-                   :message/requires-ack? :payload/ack? ::id :message/topic
-                   ::attempts ::was-sent?]))
+  (s/keys :req-un [:message/sig :message/to :shh/payload :payload/ack? ::id
+                   :message/requires-ack? :message/topic ::attempts ::was-sent?]
+          :opt-un [:message/pubKey :message/symKeyID]))
 
-(defn add-prepeared-pending-message!
+(defn add-prepared-pending-message!
   [web3 {:keys [message-id to key-type] :as pending-message}]
   {:pre [(valid? :delivery/pending-message pending-message)]}
-  (debug :add-prepeared-pending-message!)
-  (let [message          (-> pending-message
-                             (select-keys [:sig :key :topic :payload])
-                             (assoc :type key-type))
+  (debug :add-prepared-pending-message!)
+  (let [message          (select-keys
+                           pending-message
+                           [:sig :pubKey :symKeyID :topic :payload])
         pending-message' (assoc pending-message :message message
                                                 :id message-id)]
     (swap! messages assoc-in [web3 message-id to] pending-message')

@@ -108,4 +108,4 @@
         web3
         (assoc options :online-message online-message)))
     (doseq [pending-message pending-messages]
-      (d/add-prepeared-pending-message! web3 pending-message))))
+      (d/add-prepared-pending-message! web3 pending-message))))

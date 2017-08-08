@@ -138,7 +138,7 @@
                       [component])]])]))))})))
 
 (defn init []
-  (utils/register-exception-handler)
+  #_(utils/register-exception-handler)
   (status/call-module status/init-jail)
   (dispatch-sync [:reset-app])
   (dispatch [:listen-to-network-status!])
